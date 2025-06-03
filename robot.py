@@ -76,14 +76,9 @@ class myRobot(wpilib.TimedRobot):
                 motor.setNeutralMode(NeutralMode.Coast)
             else:
                 motor.setNeutralMode(NeutralMode.Brake)
-    def calcDrive(self, x: float, y: float) -> [float, float]:
-        current_angle = self.gyro.getAngle() % 360
-
-        x = math.
-
     def teleopPeriodic(self):
         #Set drive
-        #self.drive.arcadeDrive(-self.xbox.getLeftY(), self.xbox.getRightX())
+        self.drive.arcadeDrive(-self.xbox.getLeftY(), self.xbox.getRightX())
 
         #Set Arm
         lt = self.xbox.getLeftTriggerAxis()
