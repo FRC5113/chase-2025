@@ -6,7 +6,6 @@ from phoenix6.configs import TalonFXConfiguration
 from phoenix5 import TalonSRX 
 from phoenix5 import NeutralMode
 from navx import AHRS
-import math
 
 class myRobot(wpilib.TimedRobot):
     def robotInit(self):
@@ -18,11 +17,12 @@ class myRobot(wpilib.TimedRobot):
         self.right2 = rev.SparkMax(13, BRUSHLESS)
         self.arm = TalonFX(12) #make sure can ID is correct
         self.spinner = TalonSRX(40) #make sure CAN ID is correct
+        self.encoder = self.left1.getAbsoluteEncoder()
 
         self.configureMotor(self.left1)
         self.configureMotor(self.left2, self.left1)
-        self.configureMotor(self.right1)
-        self.configureMotor(self.right2, self.right1)
+        self.configureMotor(self.right1, inverted=True)
+        self.configureMotor(self.right2, self.right1, inverted=True)
 
         self.xbox = wpilib.XboxController(0)
 
@@ -48,7 +48,7 @@ class myRobot(wpilib.TimedRobot):
         self.configureMotor(self.right2)
     # 21 and 54 are right
     # 52 and 51 are left
-    def configureMotor(self, motor: rev.SparkMax|TalonFX|TalonSRX, follow: rev.SparkMax = None,coast:bool = True) -> None:
+    def configureMotor(self, motor: rev.SparkMax|TalonFX|TalonSRX, follow: rev.SparkMax = None,coast:bool = True, inverted: bool = False) -> None:
         if isinstance(motor,rev.SparkMax):
             if follow is not None:
                 motor.configure(
@@ -68,6 +68,9 @@ class myRobot(wpilib.TimedRobot):
                     rev.SparkMax.ResetMode.kResetSafeParameters,
                     rev.SparkMax.PersistMode.kPersistParameters,
                 )
+            if(inverted):
+                motor.setInverted(True)
+
         elif isinstance(motor, TalonFX) or isinstance(motor, TalonSRX):
             if follow is not None:
                 print("Chase, you are a moron")
@@ -76,15 +79,24 @@ class myRobot(wpilib.TimedRobot):
                 motor.setNeutralMode(NeutralMode.Coast)
             else:
                 motor.setNeutralMode(NeutralMode.Brake)
+
+    def calcAngle(self, input) -> float:
+        if(input > 35):
+            return 35
+        if(input < 0):
+            return 0
+        return input
+
+
     def teleopPeriodic(self):
         #Set drive
-        self.drive.arcadeDrive(-self.xbox.getLeftY(), self.xbox.getRightX())
+        self.drive.tankDrive(self.xbox.getleftY(), self.xbox.getRightY())
 
         #Set Arm
         lt = self.xbox.getLeftTriggerAxis()
         rt = self.xbox.getRightTriggerAxis()
         if(lt > rt and lt > -1):
-            self.arm.set(lt)
+            self.arm.set()
         elif(rt > lt and rt > -1):
             self.arm.set(-rt)
 
