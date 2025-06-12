@@ -15,7 +15,9 @@ class myRobot(wpilib.TimedRobot):
         self.left2 = rev.SparkMax(14, BRUSHLESS)
         self.right1 = rev.SparkMax(11, BRUSHLESS)
         self.right2 = rev.SparkMax(13, BRUSHLESS)
-        self.arm = TalonFX(12) #make sure can ID is correct
+        self.arm = TalonFX(12) # Ryan: You dont wanna reuese can ids. 12 is being used by drive motor so
+                               # what i would do is make it 21 so the tens place is the component and 
+                               # the ones place is the device
         self.spinner = TalonSRX(40) #make sure CAN ID is correct
         self.encoder = self.left1.getAbsoluteEncoder()
 
@@ -74,13 +76,14 @@ class myRobot(wpilib.TimedRobot):
         elif isinstance(motor, TalonFX) or isinstance(motor, TalonSRX):
             if follow is not None:
                 print("Chase, you are a moron")
-            #Ryan, is this code correct
+            # Ryan: This seems good for TalonSRX but not Talonfx
             if coast:
                 motor.setNeutralMode(NeutralMode.Coast)
             else:
                 motor.setNeutralMode(NeutralMode.Brake)
 
     def calcAngle(self, input) -> float:
+        # Ryan: I would look how we did it on pelican for the claw
         if(input > 35):
             return 35
         if(input < 0):
@@ -93,9 +96,10 @@ class myRobot(wpilib.TimedRobot):
         self.drive.tankDrive(self.xbox.getleftY(), self.xbox.getRightY())
 
         #Set Arm
-        lt = self.xbox.getLeftTriggerAxis()
+        lt = self.xbox.getLeftTriggerAxis()   # Ryan: dont set vars for stuff like these plz so its cleaner and
+                                              # easier to read
         rt = self.xbox.getRightTriggerAxis()
-        if(lt > rt and lt > -1):
+        if(lt > rt and lt > -1): # Ryan: Its always gonna be greater than -1 as its bound to a range of  [0,1]
             self.arm.set()
         elif(rt > lt and rt > -1):
             self.arm.set(-rt)
