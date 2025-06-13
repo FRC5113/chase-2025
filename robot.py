@@ -7,7 +7,7 @@ from phoenix5 import TalonSRX
 from phoenix5 import NeutralMode
 from navx import AHRS
 
-class myRobot(wpilib.TimedRobot):
+class MyRobot(wpilib.TimedRobot):
     def robotInit(self):
         BRUSHLESS = rev.SparkMax.MotorType.kBrushless
         self.talon_config = TalonFXConfiguration()
